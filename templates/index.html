@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linkler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input[type="text"], select {
+            width: 100%;
+            padding: 5px;
+            margin-top: 5px;
+        }
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        a {
+            text-decoration: none;
+            color: #000;
+        }
+        .search-form {
+            margin-top: 20px;
+        }
+        .tag-search {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Linkler</h1>
+
+    <form action="{{ url_for('add_link') }}" method="post">
+        <div class="form-group">
+            <label for="name">Link Adı:</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+            <label for="url">Link Adresi:</label>
+            <input type="url" class="form-control" id="url" name="url" required>
+        </div>
+        <div class="form-group">
+            <label for="tag">Etiket:</label>
+            <select class="form-control" name="tag">
+                <option value="">Etiket Seçiniz</option>
+                {% for tag in tags %}
+                    <option value="{{ tag.name }}" {% if selected_tag_name == tag.name %}selected{% endif %} style="color: {{ tag.color }}">{{ tag.name }}</option>
+                {% endfor %}
+            </select>
+            <input type="text" class="form-control" id="linkTag" name="linkTag" placeholder="Etiket giriniz">
+        </div>
+        <div class="form-group">
+            <label for="colorSelect">Renk:</label>
+            <select class="form-control" id="colorSelect" name="colorSelect" onchange="changeColor()">
+                {% for color in colors %}
+                <option value="{{ color.value }}">{{ color.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Kaydet</button>
+    </form>
+
+    <h2>Tüm Linkler</h2>
+    <table>
+        <tr>
+            <th>İsim</th>
+            <th>Link</th>
+            <th>Etiket</th>
+        </tr>
+        {% for link in links %}
+            <tr data-color="{{ link.color }}">
+                <td><strong>{{ link.name }}</strong></td>
+                <td><a href="{{ link.url }}">{{ link.url }}</a></td>
+                <td><span class="tag-search" style="background-color: {{ link.color }};">{{ link.tag.name if link.tag else '' }}</span></td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Genel Arama</h2>
+    <form class="search-form" action="/search" method="post">
+        <label for="query">Arama Sorgusu:</label>
+        <input type="text" id="query" name="query">
+        <input type="submit" value="Ara">
+    </form>
+</body>
+<script>
+    function changeColor() {
+        var selectColor = document.getElementById("colorSelect");
+        var selectedColor = selectColor.options[selectColor.selectedIndex].value;
+        document.getElementById("colorSelect").value = selectedColor;
+    }
+
+    function changeTag() {
+        var selectTag = document.getElementById("tag");
+        var selectedTag = selectTag.options[selectTag.selectedIndex];
+        var selectedTagName = selectedTag.text;
+        var selectedTagColor = selectedTag.getAttribute('data-color');
+
+        if (selectedTagName !== "Etiket Seçiniz") {
+            document.getElementById("linkTag").value = selectedTagName;
+            document.getElementById("colorSelect").value = selectedTagColor;
+        } else {
+            document.getElementById("linkTag").value = "";
+        }
+    }
+</script>
+
+</html>
